@@ -3,16 +3,21 @@ package com.example.studysmart.dashboard
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -29,10 +34,76 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.studysmart.R
 import com.example.studysmart.components.CountCard
+import com.example.studysmart.components.SubjectCard
+import com.example.studysmart.components.studySessionList
+import com.example.studysmart.components.tasksList
+import com.example.studysmart.domain.model.Session
 import com.example.studysmart.domain.model.Subject
+import com.example.studysmart.domain.model.Task
+import com.example.studysmart.ui.theme.gradient2
 
 @Composable
 fun DashboardScreen() {
+    val subjectList= listOf(
+        Subject(subjectId = 0, name = "English", 12f, Subject.subjectColors[0]),
+        Subject(subjectId = 0, name = "Computer", 12f, Subject.subjectColors[1]),
+        Subject(subjectId = 0, name = "Maths", 12f, Subject.subjectColors[2]),
+        Subject(subjectId = 0, name = "Hindi", 12f, Subject.subjectColors[3]),
+    )
+
+    val listOfTask = listOf(
+        Task(
+            taskSubjectId = 0,
+            taskId = 1,
+            title = "Computer Tasks",
+            description = "",
+            dueDate = 10,
+            priority = 1,
+            relatedToSubject = "Computer",
+            isComplete = true
+        ),
+        Task(
+            taskSubjectId = 0,
+            taskId = 1,
+            title = "Maths Tasks",
+            description = "",
+            dueDate = 10,
+            priority = 1,
+            relatedToSubject = "Maths",
+            isComplete = true
+        ),
+        Task(
+            taskSubjectId = 0,
+            taskId = 1,
+            title = "Science Tasks",
+            description = "",
+            dueDate = 20 / 2 / 2025,
+            priority = 2,
+            relatedToSubject = "Science",
+            isComplete = false
+        ),
+        Task(
+            taskSubjectId = 0,
+            taskId = 1,
+            title = "Science Tasks",
+            description = "",
+            dueDate = 2022025,
+            priority = 3,
+            relatedToSubject = "Science",
+            isComplete = false
+        )
+    )
+
+    val sessionList = listOf(
+        Session(
+            sessionSubjectId = 1,
+            relatedToSubject = "Maths",
+            date = 10L,
+            duration = 20,
+            subjectId = 1
+        )
+    )
+
     Scaffold(topBar = {
         DashboardScreenTopBar()
     }) { paddingValues ->
@@ -54,8 +125,34 @@ fun DashboardScreen() {
             item {
                 SubjectCardsSection(
                     Modifier.fillMaxWidth(),
-                    subjectList = emptyList())
+                    subjectList = subjectList
+                )
             }
+            item {
+                Button(
+                    onClick = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 48.dp, vertical = 20.dp)
+                ) {
+                    Text(text = "Start Study Session", textAlign = TextAlign.Center)
+                }
+            }
+            tasksList(
+                sectionTitle = "UPCOMING TASKS",
+                tasks = listOfTask,
+                onCheckBoxClick = {},
+                onTaskCardClick = {})
+
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            studySessionList(
+                sectionTitle = "RECENT STUDY SESSIONS",
+                sessionList = sessionList,
+                onDeleteIconClick = {}
+            )
         }
     }
 }
@@ -143,8 +240,18 @@ private fun SubjectCardsSection(
                 textAlign = TextAlign.Center
             )
 
-        } else {
-
+        }
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
+        ) {
+            items(subjectList) { subject ->
+                SubjectCard(
+                    subjectName = subject.name,
+                    gradientColors = subject.colors,
+                    onClick = {}
+                )
+            }
         }
 
     }
