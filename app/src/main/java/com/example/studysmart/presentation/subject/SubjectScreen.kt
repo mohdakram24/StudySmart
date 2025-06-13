@@ -1,4 +1,4 @@
-package com.example.studysmart.subject
+package com.example.studysmart.presentation.subject
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,18 +40,51 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.studysmart.components.AddSubjectDialog
-import com.example.studysmart.components.CountCard
-import com.example.studysmart.components.DeleteDialog
-import com.example.studysmart.components.studySessionList
-import com.example.studysmart.components.tasksList
+import com.example.studysmart.presentation.components.AddSubjectDialog
+import com.example.studysmart.presentation.components.CountCard
+import com.example.studysmart.presentation.components.DeleteDialog
+import com.example.studysmart.presentation.components.studySessionList
+import com.example.studysmart.presentation.components.tasksList
+import com.example.studysmart.destinations.TaskScreenRouteDestination
 import com.example.studysmart.domain.model.Subject
 import com.example.studysmart.listOfTask
 import com.example.studysmart.sessionList
+import com.example.studysmart.presentation.task.TaskScreenNavArgs
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+// For passing the arguments from one screen to another
+data class SubjectScreenNavArgs(
+    val subjectId: Int
+)
+@Destination(navArgsDelegate = SubjectScreenNavArgs::class)
+@Composable
+fun SubjectScreenRoute(
+    navigator: DestinationsNavigator
+) {
+    SubjectScreen(
+        onBackButtonClick = {
+            // Return to that screen from where it has come.
+            navigator.navigateUp()
+        },
+        onAddTaskButtonClick = {
+            val navArg = TaskScreenNavArgs(taskId = null, subjectId = -1)
+            navigator.navigate(TaskScreenRouteDestination(navArg))
+        },
+        onTaskCardClick = { taskId ->
+            val navArg = TaskScreenNavArgs(taskId = taskId, subjectId = null)
+            navigator.navigate(TaskScreenRouteDestination(navArg))
+        }
+    )
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubjectScreen() {
+private fun SubjectScreen(
+    onBackButtonClick: () -> Unit,
+    onAddTaskButtonClick: () -> Unit,
+    onTaskCardClick: (Int?) -> Unit,
+
+) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val listState = rememberLazyListState()
     val isFABExtended by remember {
@@ -115,14 +148,14 @@ fun SubjectScreen() {
         topBar = {
             SubjectScreenTopAppBar(
                 title = "English",
-                onBackButtonClick = {},
+                onBackButtonClick = onBackButtonClick,
                 onDeleteButtonClick = {isDeleteSubjectDialogOpen = true},
                 onEditButtonClick = {isEditSubjectDialogOpen = true},
                 scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = {isAddSubjectDialogOpen = true},
+            ExtendedFloatingActionButton(onClick = onAddTaskButtonClick,
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -157,18 +190,18 @@ fun SubjectScreen() {
                         " Click the + Button to add new task.",
                 tasks = listOfTask,
                 onCheckBoxClick = {},
-                onTaskCardClick = {})
+                onTaskCardClick = onTaskCardClick)
 
             item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
             tasksList(
-                sectionTitle = "UPCOMING TASKS",
+                sectionTitle = "COMPLETED TASKS",
                 emptyListText = "You don't have any completed tasks.\n" +
                         " Click the check box on completion of task.",
                 tasks = listOfTask,
                 onCheckBoxClick = {},
-                onTaskCardClick = {})
+                onTaskCardClick = onTaskCardClick)
 
             item {
                 Spacer(modifier = Modifier.height(12.dp))

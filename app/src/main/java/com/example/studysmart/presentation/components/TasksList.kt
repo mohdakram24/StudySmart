@@ -1,8 +1,7 @@
-package com.example.studysmart.components
+package com.example.studysmart.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,40 +12,38 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.studysmart.R
-import com.example.studysmart.domain.model.Session
+import com.example.studysmart.domain.model.Task
+import com.example.studysmart.util.Priority
 
-fun LazyListScope.studySessionList(
+fun LazyListScope.tasksList(
     sectionTitle: String,
-    emptyListText: String = "You don't have any recent study sessions.\n" +
-    "Start a study session to begin recording your session",
-    sessionList: List<Session>,
-    onDeleteIconClick: (Session) -> Unit
+    tasks: List<Task>,
+    onTaskCardClick: (Int?) -> Unit,
+    onCheckBoxClick: (Task) -> Unit,
+    emptyListText: String = "You don't have any upcoming tasks.\n Click the + button in subject screen to add new task."
 ) {
     item {
         Text(
-            modifier = Modifier.padding(start = 10.dp),
             text = sectionTitle,
             style = MaterialTheme.typography.bodySmall
         )
     }
-    if (sessionList.isEmpty()) {
+    if (tasks.isEmpty()) {
         item {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -55,8 +52,8 @@ fun LazyListScope.studySessionList(
                 Image(
                     modifier = Modifier
                         .size(120.dp),
-                    painter = painterResource(R.drawable.img_lamp),
-                    contentDescription = sectionTitle
+                    painter = painterResource(R.drawable.img_tasks),
+                    contentDescription = emptyListText
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
@@ -68,23 +65,27 @@ fun LazyListScope.studySessionList(
             }
         }
     }
-    items(sessionList){ session ->
-        StudySessionCard(
+    items(tasks) { task ->
+        TasksCard(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-            session = session,
-            onDeleteIconClick = {onDeleteIconClick(session)}
+            task = task,
+            onCheckBoxClick = { onCheckBoxClick(task) },
+            onCLick = { onTaskCardClick(task.taskId) }
         )
     }
 }
 
 @Composable
-fun StudySessionCard(
+private fun TasksCard(
     modifier: Modifier = Modifier,
-    session: Session,
-    onDeleteIconClick: () -> Unit
+    task: Task,
+    onCheckBoxClick: () -> Unit,
+    onCLick: () -> Unit
 ) {
-    Card(
-        modifier = modifier
+    ElevatedCard(
+        modifier = modifier.clickable {
+            onCLick()
+        }
     ) {
         Row(
             modifier = modifier
@@ -92,28 +93,33 @@ fun StudySessionCard(
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            TasksCheckbox(
+                isComplete = task.isComplete,
+                borderColor = Priority.fromInt(task.priority).color,
+                onCheckBoxClick = onCheckBoxClick
+            )
+            Spacer(modifier = modifier.width(10.dp))
             Column {
                 Text(
-                    text = session.relatedToSubject,
+                    text = task.title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis, // places 3 dots at the end
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    textDecoration = if (task.isComplete) {
+                        TextDecoration.LineThrough
+                    } else {
+                        TextDecoration.None
+                    }
+                )
+                Spacer(
+                    modifier = modifier.height(4.dp)
                 )
                 Text(
-                    text = "${session.date}",
+                    text = "${task.dueDate}",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-            Spacer(modifier = Modifier.weight(1f)) // Will take whole place after any control with 1f
-            Text(
-                text = "${session.duration}",
-                style = MaterialTheme.typography.bodySmall
-            )
-            IconButton(
-                onClick = { onDeleteIconClick() }
-            ) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete Session")
-            }
         }
+
     }
 }

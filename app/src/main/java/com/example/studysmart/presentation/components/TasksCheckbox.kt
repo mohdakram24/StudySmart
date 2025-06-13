@@ -1,4 +1,4 @@
-package com.example.studysmart.components
+package com.example.studysmart.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border

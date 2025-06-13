@@ -1,4 +1,4 @@
-package com.example.studysmart.components
+package com.example.studysmart.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

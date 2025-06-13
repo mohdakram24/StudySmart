@@ -1,4 +1,4 @@
-package com.example.studysmart.components
+package com.example.studysmart.presentation.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text

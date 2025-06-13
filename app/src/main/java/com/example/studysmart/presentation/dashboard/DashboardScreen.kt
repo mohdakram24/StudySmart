@@ -1,4 +1,4 @@
-package com.example.studysmart.dashboard
+package com.example.studysmart.presentation.dashboard
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -38,22 +38,58 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.studysmart.R
-import com.example.studysmart.components.AddSubjectDialog
-import com.example.studysmart.components.CountCard
-import com.example.studysmart.components.DeleteDialog
-import com.example.studysmart.components.SubjectCard
-import com.example.studysmart.components.studySessionList
-import com.example.studysmart.components.tasksList
+import com.example.studysmart.presentation.components.AddSubjectDialog
+import com.example.studysmart.presentation.components.CountCard
+import com.example.studysmart.presentation.components.DeleteDialog
+import com.example.studysmart.presentation.components.SubjectCard
+import com.example.studysmart.presentation.components.studySessionList
+import com.example.studysmart.presentation.components.tasksList
+import com.example.studysmart.destinations.SessionScreenRouteDestination
+import com.example.studysmart.destinations.SubjectScreenRouteDestination
+import com.example.studysmart.destinations.TaskScreenRouteDestination
 import com.example.studysmart.domain.model.Session
 import com.example.studysmart.domain.model.Subject
 import com.example.studysmart.domain.model.Task
 import com.example.studysmart.listOfTask
 import com.example.studysmart.sessionList
+import com.example.studysmart.presentation.subject.SubjectScreenNavArgs
 import com.example.studysmart.subjectList
+import com.example.studysmart.presentation.task.TaskScreenNavArgs
 import com.example.studysmart.ui.theme.gradient2
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
+//@RootNavGraph(start = true)
+// Deprecated
+@Destination(start = true)
+@Composable
+fun DashboardScreenRoute(
+    navigator: DestinationsNavigator
+) {
+    DashboardScreen(
+        onSubjectCardClick = {subjectId ->
+            subjectId?.let {
+                val navArg = SubjectScreenNavArgs(subjectId)
+                navigator.navigate(SubjectScreenRouteDestination(navArg))
+            }
+        },
+        onTaskCardClick = {taskId ->
+            val navArg = TaskScreenNavArgs(taskId = taskId, subjectId = null)
+            navigator.navigate(TaskScreenRouteDestination(navArg))
+        },
+        onStartSessionButtonClick = {
+            navigator.navigate(SessionScreenRouteDestination)
+        }
+    )
+}
 
 @Composable
-fun DashboardScreen() {
+private fun DashboardScreen(
+    onSubjectCardClick: (Int?) -> Unit,
+    onTaskCardClick: (Int?) -> Unit,
+    onStartSessionButtonClick: () -> Unit,
+) {
     var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
     var isDeleteSessionDialogOpen by rememberSaveable { mutableStateOf(false) }
     var subjectName by remember { mutableStateOf("") }
@@ -101,12 +137,13 @@ fun DashboardScreen() {
                 SubjectCardsSection(
                     Modifier.fillMaxWidth(),
                     subjectList = subjectList,
-                    onAddIconClicked = {isAddSubjectDialogOpen = true}
+                    onAddIconClicked = {isAddSubjectDialogOpen = true},
+                    onSubjectCardClick = onSubjectCardClick
                 )
             }
             item {
                 Button(
-                    onClick = {},
+                    onClick = onStartSessionButtonClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 48.dp, vertical = 20.dp)
@@ -118,7 +155,7 @@ fun DashboardScreen() {
                 sectionTitle = "UPCOMING TASKS",
                 tasks = listOfTask,
                 onCheckBoxClick = {},
-                onTaskCardClick = {})
+                onTaskCardClick = onTaskCardClick)
 
             item {
                 Spacer(modifier = Modifier.height(12.dp))
@@ -178,7 +215,8 @@ private fun SubjectCardsSection(
     modifier: Modifier,
     subjectList: List<Subject>,
     emptyListText: String = "You don't have any subjects.\n Click the + button to add new subjects.",
-    onAddIconClicked: () -> Unit
+    onAddIconClicked: () -> Unit,
+    onSubjectCardClick: (Int?) -> Unit
 ) {
     Column(modifier = modifier) {
         Row(
@@ -226,7 +264,7 @@ private fun SubjectCardsSection(
                 SubjectCard(
                     subjectName = subject.name,
                     gradientColors = subject.colors,
-                    onClick = {}
+                    onClick = {onSubjectCardClick(subject.subjectId)}
                 )
             }
         }
